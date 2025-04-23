@@ -1,0 +1,50 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the ODE
+def f(t, y):
+    return 1 + y/t + (y/t)**2
+
+# Exact solution
+def exact_solution(t):
+    return t * np.tan(np.log(t))
+
+# Euler's method
+def euler_method(f, t0, y0, h, n):
+    t = np.zeros(n+1)
+    y = np.zeros(n+1)
+    t[0] = t0
+    y[0] = y0
+    for i in range(n):
+        y[i+1] = y[i] + h * f(t[i], y[i])
+        t[i+1] = t[i] + h
+    return t, y
+
+# Parameters
+t0 = 1
+y0 = 0
+h = 0.1
+n = int((2 - t0)/h)
+
+# Compute Euler approximation
+t_euler, y_euler = euler_method(f, t0, y0, h, n)
+
+# Exact solution
+t_exact = np.linspace(1, 2, 100)
+y_exact = exact_solution(t_exact)
+
+# Plot results
+plt.figure(figsize=(10, 6))
+plt.plot(t_exact, y_exact, label='Exact Solution', color='blue')
+plt.plot(t_euler, y_euler, 'o--', label='Euler Approximation', color='red')
+plt.xlabel('t')
+plt.ylabel('y(t)')
+plt.title('Euler Method vs Exact Solution (h=0.1)')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Print results
+print("Euler Method Results (h=0.1):")
+for i in range(len(t_euler)):
+    print(f"t = {t_euler[i]:.1f}, y_euler = {y_euler[i]:.6f}, y_exact = {exact_solution(t_euler[i]):.6f}, Error = {abs(y_euler[i] - exact_solution(t_euler[i])):.6f}")
