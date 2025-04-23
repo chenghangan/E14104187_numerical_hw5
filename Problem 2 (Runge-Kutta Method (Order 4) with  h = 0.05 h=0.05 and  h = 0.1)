@@ -1,0 +1,82 @@
+# Define the system of ODEs
+def f_system(t, u):
+    u1, u2 = u
+    du1dt = 9*u1 + 24*u2 + 5*np.cos(t) - (1/3)*np.sin(t)
+    du2dt = -24*u1 - 52*u2 - 9*np.cos(t) + (1/3)*np.sin(t)
+    return np.array([du1dt, du2dt])
+
+# Exact solutions
+def exact_u1(t):
+    return 2*np.exp(-3*t) - np.exp(-39*t) + (1/3)*np.cos(t)
+
+def exact_u2(t):
+    return -np.exp(-3*t) + 2*np.exp(-39*t) - (1/3)*np.cos(t)
+
+# Runge-Kutta method of order 4
+def rk4_system(f, t0, u0, h, n):
+    t = np.zeros(n+1)
+    u = np.zeros((n+1, len(u0)))
+    t[0] = t0
+    u[0] = u0
+    for i in range(n):
+        k1 = h * f(t[i], u[i])
+        k2 = h * f(t[i] + h/2, u[i] + k1/2)
+        k3 = h * f(t[i] + h/2, u[i] + k2/2)
+        k4 = h * f(t[i] + h, u[i] + k3)
+        u[i+1] = u[i] + (k1 + 2*k2 + 2*k3 + k4)/6
+        t[i+1] = t[i] + h
+    return t, u
+
+# Parameters
+t0 = 0
+u0 = np.array([4/3, 2/3])
+h1 = 0.05
+h2 = 0.1
+n1 = int((1 - t0)/h1)
+n2 = int((1 - t0)/h2)
+
+# Compute RK4 approximations
+t_rk4_1, u_rk4_1 = rk4_system(f_system, t0, u0, h1, n1)
+t_rk4_2, u_rk4_2 = rk4_system(f_system, t0, u0, h2, n2)
+
+# Exact solutions at RK4 points
+u1_exact_1 = exact_u1(t_rk4_1)
+u2_exact_1 = exact_u2(t_rk4_1)
+u1_exact_2 = exact_u1(t_rk4_2)
+u2_exact_2 = exact_u2(t_rk4_2)
+
+# Plot results for u1
+plt.figure(figsize=(10, 6))
+plt.plot(t_rk4_1, u_rk4_1[:, 0], 'o--', label=f'RK4 Approximation (h={h1})', color='red')
+plt.plot(t_rk4_2, u_rk4_2[:, 0], 's--', label=f'RK4 Approximation (h={h2})', color='blue')
+plt.plot(t_rk4_1, u1_exact_1, label='Exact Solution', color='black')
+plt.xlabel('t')
+plt.ylabel('u1(t)')
+plt.title('Runge-Kutta Method (Order 4) vs Exact Solution for u1')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Plot results for u2
+plt.figure(figsize=(10, 6))
+plt.plot(t_rk4_1, u_rk4_1[:, 1], 'o--', label=f'RK4 Approximation (h={h1})', color='red')
+plt.plot(t_rk4_2, u_rk4_2[:, 1], 's--', label=f'RK4 Approximation (h={h2})', color='blue')
+plt.plot(t_rk4_1, u2_exact_1, label='Exact Solution', color='black')
+plt.xlabel('t')
+plt.ylabel('u2(t)')
+plt.title('Runge-Kutta Method (Order 4) vs Exact Solution for u2')
+plt.legend()
+plt.grid()
+plt.show()
+
+# Print results for h=0.05
+print("Runge-Kutta Method (Order 4) Results (h=0.05):")
+for i in range(0, len(t_rk4_1), 2):  # Print every 2nd step for brevity
+    print(f"t = {t_rk4_1[i]:.2f}, u1_rk4 = {u_rk4_1[i, 0]:.6f}, u1_exact = {u1_exact_1[i]:.6f}, Error = {abs(u_rk4_1[i, 0] - u1_exact_1[i]):.6f}")
+    print(f"t = {t_rk4_1[i]:.2f}, u2_rk4 = {u_rk4_1[i, 1]:.6f}, u2_exact = {u2_exact_1[i]:.6f}, Error = {abs(u_rk4_1[i, 1] - u2_exact_1[i]):.6f}")
+
+# Print results for h=0.1
+print("\nRunge-Kutta Method (Order 4) Results (h=0.1):")
+for i in range(len(t_rk4_2)):
+    print(f"t = {t_rk4_2[i]:.2f}, u1_rk4 = {u_rk4_2[i, 0]:.6f}, u1_exact = {u1_exact_2[i]:.6f}, Error = {abs(u_rk4_2[i, 0] - u1_exact_2[i]):.6f}")
+    print(f"t = {t_rk4_2[i]:.2f}, u2_rk4 = {u_rk4_2[i, 1]:.6f}, u2_exact = {u2_exact_2[i]:.6f}, Error = {abs(u_rk4_2[i, 1] - u2_exact_2[i]):.6f}")
